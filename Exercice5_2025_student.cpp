@@ -13,7 +13,10 @@ using namespace std;
 
 double energy(const std::vector<double>& fnow, double dx) {
   double ener = 0.0; // TODO: compute quantity E 
-    return 0.0;
+  for(auto el: fnow){
+	  ener+=el*el;
+  }
+  return dx*ener;
 }
 
 
@@ -25,11 +28,11 @@ void boundary_condition(vector<double> &fnext, vector<double> &fnow, double cons
         fnext[0] = 0.0; 
 	// NB: on peut aussi utiliser la condition "excitation" et poser A=0
       }else if(bc_l == "libre"){
-        fnext[0] = 0.0; // TODO : Modifier pour imposer la condition au bord gauche libre
+        fnext[0] = fnext[1]; // TODO : Modifier pour imposer la condition au bord gauche libre
       }else if (bc_l =="sortie"){
-        fnext[0] = 0.0; // TODO : Modifier pour imposer la condition au bord gauche "sortie de l'onde"
+        fnext[0] =  fnow[0]+sqrt(beta2[0])*(fnow[0]-fnow[1]); // TODO : Modifier pour imposer la condition au bord gauche "sortie de l'onde"
       }else if (bc_l == "excitation"){
-        fnext[0] = 0.0; // TODO : Modifier pour imposer la condition au bord gauche sinusoidale
+        fnext[0] = A*sin(om*t); // TODO : Modifier pour imposer la condition au bord gauche sinusoidale
       }else{
         cerr << "Merci de choisir une condition aux bord gauche valide" << endl;
       }
@@ -38,11 +41,11 @@ void boundary_condition(vector<double> &fnext, vector<double> &fnow, double cons
         fnext[N-1] = 0.0; 
 	// NB: on peut aussi utiliser la condition "excitation" et poser A=0	
       }else if(bc_r == "libre"){
-        fnext[N-1] = 0.0; // TODO : Modifier pour imposer la condition au bord droit libre
+        fnext[N-1] = fnext[N-2]; // TODO : Modifier pour imposer la condition au bord droit libre
       }else if (bc_r =="sortie"){
-        fnext[N-1] = 0.0; // TODO : Modifier pour imposer la condition au bord droit "sortie de l'onde"
-      }else if (bc_l == "excitation"){ 
-        fnext[N-1] = 0.0; // TODO : Modifier pour imposer la condition au bord droit sinusoidale
+        fnext[N-1] = fnow[N-1]-sqrt(beta2[0])*(fnow[N-1]-fnow[N-2]); // TODO : Modifier pour imposer la condition au bord droit "sortie de l'onde"
+      }else if (bc_r == "excitation"){ 
+        fnext[N-1] = A*sin(om*t); // TODO : Modifier pour imposer la condition au bord droit sinusoidale
       }else{
         cerr << "Merci de choisir une condition aux bord droit valide" << endl;
       }
@@ -55,11 +58,13 @@ double finit(double x, double n_init, double L, double f_hat, double x1, double 
 
 if(initialization=="mode"){
   // TODO: initialiser la fonction f(x,t=0) selon un mode propre
-  finit_ = 0.0;
+  finit_ = f_hat*sin(n_init*x*PI/L);
 }
 else{
   // TODO: initialiser la fonction f(x,t=0) selon la donnée du problème
-  finit_ =0.0;
+  if(x<=x1){ finit_ = 0.0;}
+  else if(x>=x2){finit_ = 0.0;}
+  else{finit_ = 0.5*f_hat*(1-cos(2*PI*(x-x1)/(x2-x1)));}
 }
   return finit_;
 }
@@ -159,33 +164,42 @@ int main(int argc, char* argv[])
      } 
      else {
        // TODO: programmer la fonction h(x) selon la donnée
-       h0[i]  = 999.999; // MODIFIER
+       if(x[i]<=xa){
+		   h0[i]  = hL;
+	   }
+	   else if(x[i]<=xb){
+		   h0[i]  = 0.5*(hL+hR)+0.5*(hL-hR)*cos(PI*(x[i]-xa)/(xb-xa));
+	   }
+	   else {
+		   h0[i]  = hR;
+	   }
+		   
      }
-     vel2[i]  = g* h0[i];
+     vel2[i]  = g*h0[i];
   }
   // maiximal value of u^2 (to be used to set dt)
   auto max_vel2 = std::max_element(vel2.begin(), vel2.end());
   // TODO: set dt for given CFL
-  dt = 1.0; // MODIFY
+  dt = CFL*dx/(*max_vel2); // MODIFY
   // TODO: define dt and CFL with given nsteps
   if(impose_nsteps){
-    dt  = 1.0; // MODIFY
-    CFL = 1.0; // MODIFY
+    dt  = tfin/nsteps; // MODIFY
+    CFL = sqrt(*max_vel2)*dt/dx; // MODIFY
   }
 
   // Fichiers de sortie :
   string output = configFile.get<string>("output");
 
-  ofstream fichier_x((output + "_x").c_str());
+  ofstream fichier_x(("x_"+output).c_str());
   fichier_x.precision(15);
 
-  ofstream fichier_v((output + "_v").c_str());
+  ofstream fichier_v(("v_"+output).c_str());
   fichier_v.precision(15);
 
-  ofstream fichier_f((output + "_f").c_str());
+  ofstream fichier_f(("f_"+output).c_str());
   fichier_f.precision(15);
 
-  ofstream fichier_en((output + "_en").c_str());
+  ofstream fichier_en(("en_"+output).c_str());
   fichier_en.precision(15);
 
   // Initialisation des tableaux du schema numerique :
@@ -195,18 +209,18 @@ int main(int argc, char* argv[])
   {
     fpast[i] = 0.;
     fnow[i]  = 0.;
-    beta2[i] = 1.0; // TODO: Modifier pour calculer beta^2 aux points de maillage
+    beta2[i] = vel2[i]*dt*dt/(dx*dx); // TODO: Modifier pour calculer beta^2 aux points de maillage
 
     fnow[i]  = finit(x[i], n_init,  L, f_hat, x1, x2, initialization);
 
     if(initial_state =="static"){
-      fpast[i] = 0.0; // TODO: system is at rest for t<=0, 
+      fpast[i] = fnow[i]; // TODO: system is at rest for t<=0, 
     }
     else if(initial_state =="right"){ 
-      fpast[i] = 0.0; // TODO: propagation to the right
+      fpast[i] = finit(x[i]+sqrt(g*h0[i])*dt, n_init,  L, f_hat, x1, x2, initialization); // TODO: propagation to the right
     }
     else if(initial_state =="left"){
-      fpast[i] = 0.0; // TODO: propagation to the left
+      fpast[i] = finit(x[i]-sqrt(g*h0[i])*dt, n_init,  L, f_hat, x1, x2, initialization); // TODO: propagation to the left
     }
   }
 
@@ -230,6 +244,19 @@ int main(int argc, char* argv[])
     for(int i(1); i<N-1; ++i)
     {
       fnext[i] = 0.0; // TODO : Schémas pour les 3 cas, Equation A ou B ou C
+      
+     if (equation_type == "A") {
+		fnext[i] = 2.0 * fnow[i] - fpast[i] + beta2[i] * (fnow[i+1] - 2.0 * fnow[i] + fnow[i-1]);
+	}
+	else if (equation_type == "B") {
+		double fluxR = 0.5 * (vel2[i+1] + vel2[i]) * (fnow[i+1] - fnow[i]);
+		double fluxL = 0.5 * (vel2[i] + vel2[i-1]) * (fnow[i] - fnow[i-1]);
+		fnext[i] = 2.0 * fnow[i] - fpast[i] + (dt * dt / (dx * dx)) * (fluxR - fluxL);
+	}
+	else if (equation_type == "C") {
+		double term = (vel2[i+1]*fnow[i+1] - 2.0*vel2[i]*fnow[i] + vel2[i-1]*fnow[i-1]) / (dx * dx);
+		fnext[i] = 2.0 * fnow[i] - fpast[i] + dt * dt * term;
+	}
     }
 
     // Impose boundary conditions
