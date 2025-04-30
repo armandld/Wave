@@ -1,17 +1,17 @@
 % Physique :
 cb_gauche = fixe
 ! fixe, libre, sortie, excitation
-cb_droite = fixe
+cb_droite = excitation
 ! fixe, libre, sortie, excitation
 v_uniform = true
 
 A = 2.0
-f_hat = 10.0
+f_hat = 0.0
 x1 = 10.0
 x2 = 15.0
 
 tfin = 10.0
-equation_type = C
+equation_type = B
 ! A, B, C
 nx = 100
 n_init = 3
@@ -21,7 +21,7 @@ initialization = autre
 initial_state = right
 ! right, left, static
 
-CFL = 1.0
+CFL = 1
 nsteps = 16000
 impose_nsteps = true
 
@@ -32,14 +32,14 @@ ecrire_f = 1
 hL = 8000.0
 hR = 20.0
 h00 = 1.0
-xa = 900000
+xa = 450000
 xb = 950000
 L = 25.0
 om = 2.0
 ! angular frequency of excitation
 
 fac = true
-cb_bas = fixe
+cb_bas = excitation
 ! fixe, libre, sortie, excitation
 cb_haut = fixe
 ! fixe, libre, sortie, excitation

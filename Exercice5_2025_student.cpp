@@ -400,14 +400,11 @@ if (!fac){
 		fnext[i] = 2.0 * (1-beta2[i]) *fnow[i] - fpast[i] + beta2[i] *(fnow[i+1] + fnow[i-1]);
 	}
 	else if (equation_type == "B") {
-		double fluxR = 0.5 * (vel2[i+1] + vel2[i]) * (fnow[i+1] - fnow[i]);
-		double fluxL = 0.5 * (vel2[i] + vel2[i-1]) * (fnow[i] - fnow[i-1]);
-		fnext[i] = 2.0 * fnow[i] - fpast[i] + (dt * dt / (dx * dx)) * (fluxR - fluxL);
-}
+		fnext[i] = 2.0 * (1-beta2[i])  *fnow[i] - fpast[i] + beta2[i]*(fnow[i+1] + fnow[i-1]) + 0.25* (beta2[i+1]-beta2[i-1])*(fnow[i+1] - fnow[i-1]);
+	}
 	else if (equation_type == "C") {
-		double term = (vel2[i+1] * fnow[i+1] - 2.0 * vel2[i] * fnow[i] + vel2[i-1] * fnow[i-1]) / (dx * dx);
-		fnext[i] = 2.0 * fnow[i] - fpast[i] + dt * dt * term;
-		}
+		fnext[i] = - fpast[i] + (2.0 + beta2[i+1]- 4*beta2[i] +beta2[i-1])* fnow[i] + (fnow[i+1] + fnow[i-1]) * beta2[i] + 0.5*(beta2[i+1]-beta2[i-1])*(fnow[i+1] - fnow[i-1]);
+	}
     }
 
     // Impose boundary conditions
@@ -561,4 +558,22 @@ if (!fac){
 }
   return 0;
 }
-
+/*
+for(int i(1); i<N-1; ++i)
+    {
+      fnext[i] = 0.0; // TODO : Schémas pour les 3 cas, Equation A ou B ou C
+      
+     if (equation_type == "A") {
+		fnext[i] = 2.0 * (1-beta2[i]) *fnow[i] - fpast[i] + beta2[i] *(fnow[i+1] + fnow[i-1]);
+	}
+	else if (equation_type == "B") {
+		double fluxR = 0.5 * (vel2[i+1] + vel2[i]) * (fnow[i+1] - fnow[i]);
+		double fluxL = 0.5 * (vel2[i] + vel2[i-1]) * (fnow[i] - fnow[i-1]);
+		fnext[i] = 2.0 * fnow[i] - fpast[i] + (dt * dt / (dx * dx)) * (fluxR - fluxL);
+}
+	else if (equation_type == "C") {
+		double term = (vel2[i+1] * fnow[i+1] - 2.0 * vel2[i] * fnow[i] + vel2[i-1] * fnow[i-1]) / (dx * dx);
+		fnext[i] = 2.0 * fnow[i] - fpast[i] + dt * dt * term;
+		}
+    }
+*/

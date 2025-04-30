@@ -34,7 +34,7 @@ def lire_configuration():
     return configuration
 
 def ecrire_configuration(nouvelles_valeurs):
-    """Écrit les nouvelles valeurs dans le fichier de configuration."""
+   
     if not os.path.exists(CONFIG_FILE):
         raise FileNotFoundError(f"Le fichier {CONFIG_FILE} n'existe pas.")
 
@@ -316,6 +316,7 @@ plt.show()
 """
 ######################################################## Question 5.3 (b) ########################################################
 """
+ecrire_valeur("fac","false")
 ecrire_valeur("n_stride",1)
 ecrire_valeur("L",15.0)
 ecrire_valeur("h00",4.0)
@@ -383,7 +384,7 @@ ax_q2.set_title(f"f(x, t) évaluée à plusieurs t pour CFL = {CFL}")
 #                                   blit=True, interval=30)
 
 
-iss = np.array([0,80,90])
+iss = np.array([0,100,120])
 for i in iss:
     plt.plot(x,f_q2[i], label = f"f(x,t={i*dt})")
 plt.legend()
@@ -391,11 +392,13 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 """
+
 ######################################################## Question 5.3 (c) ########################################################
-"""
-# Exemple pour la solution numérique et anlytique
+
+"""# Exemple pour la solution numérique et anlytique
 g  = 9.81
 
+ecrire_valeur("fac","false")
 ecrire_valeur("n_stride",1)
 ecrire_valeur("L",15.0)
 ecrire_valeur("h00",4.0)
@@ -458,7 +461,7 @@ ax_q3.set_title(f"f(x, t) évaluée à plusieurs t pour CFL = {CFL}, nx = {nx} e
 #                                   blit=True, interval=30)
 
 
-t0 = np.pi/(np.sqrt(g*h00)*((n_init+0.5)*np.pi/L))
+t0 = np.pi/(np.sqrt(g*h00)*((n_init+0.5)*np.pi/(2*L)))
 print(f"t0= {t0}")
 plt.plot(x,f_q3[int(np.floor(t0/dt))], label = "$f_{num}(x,t = T ="+f"{t0})$")
 plt.plot(x,f_hat*np.cos((2*n_init+1)*x*np.pi/(2*L)), label = "$f_{ana}(x,T)$")
@@ -470,7 +473,7 @@ plt.tight_layout()
 plt.show()
 
 
-tab = [80,120,200,300]
+tab = [90,120,200,240]
 outputs = []
 errors = []
 nxs = []
@@ -495,7 +498,7 @@ for el in tab:
     time = np.loadtxt("f_"+output_file)[:,0]
     dt = time[1]-time[0]
 
-    t0 = 2*np.pi/(np.sqrt(g*h00)*((n_init+0.5)*np.pi/L))
+    t0 = np.pi/(np.sqrt(g*h00)*((n_init+0.5)*np.pi/L))
     y_num = f_q3b[int(np.floor(t0/dt))]
     y_ana = f_hat*np.cos((2*n_init+1)*x*np.pi/(2*L))
     errors.append(dx*np.sum(np.abs(y_num - y_ana)))
@@ -503,7 +506,7 @@ for el in tab:
 print(errors)
 n= np.array(nxs)
 plt.figure()
-plt.loglog(n,np.abs(10.688-np.array(errors)), marker='v', markersize=3, color="black", linestyle='-')
+plt.loglog(n,np.abs(19.1347-np.array(errors)), marker='v', markersize=3, color="black", linestyle='-')
 plt.ylabel("erreur")
 plt.xlabel("$n$")
 plt.grid(True, linestyle="--", alpha=0.3)
@@ -515,6 +518,8 @@ plt.show()
 """
 # Exemple pour la solution numérique et anlytique
 g  = 9.81
+
+ecrire_valeur("fac","false")
 
 ecrire_valeur("n_stride",1)
 ecrire_valeur("L",15.0)
@@ -540,7 +545,7 @@ ecrire_valeur("f_hat",0)
 
 ecrire_valeur("om",0.1)
 
-OMS = np.linspace(2,5,20)
+OMS = np.linspace(0,2.4,30)
 
 E_hat = []
 
@@ -562,7 +567,7 @@ OMS= np.array(OMS)
 
 plt.figure()
 plt.plot(OMS, E_hat, markersize=3, color="black", linestyle='-')
-for n in range(3):
+for n in range(2):
     om_n = np.sqrt(g*h00)*((n+0.5)*np.pi/L)
     print(f"n = {n} et om_n = {om_n}")
     plt.axvline(om_n, color="red", linestyle='--')
@@ -577,15 +582,15 @@ g = 9.81
 for n in range(1,20):
     om_n = np.sqrt(g*h00)*(n*np.pi/L)
     print(f"n = {n} et om_n = {om_n}")
-"""
 
+"""
 ##############################################################################################################################
 ######################################################## Question 5.4 (a) ####################################################
 """
 # Exemple pour la solution numérique et anlytique
 g  = 9.81
 
-
+ecrire_valeur("fac","false")
 ecrire_valeur("L",1000000)
 ecrire_valeur("hR",20.0)
 ecrire_valeur("hL",8000.0)
@@ -600,7 +605,7 @@ ecrire_valeur("impose_nsteps","false")
 ecrire_valeur("nx",1000)
 ecrire_valeur("nsteps",64)
 ecrire_valeur("CFL",1)
-ecrire_valeur("equation_type","A")
+ecrire_valeur("equation_type","B")
 ecrire_valeur("tfin",12000)
 ecrire_valeur("initialization","autre")
 ecrire_valeur("initial_state","right")
@@ -717,6 +722,8 @@ plt.show()
 """
 ######################################################## Question 5.4 (d) ####################################################
 """
+
+ecrire_valeur("fac","false")
 ecrire_valeur("L",1000000)
 ecrire_valeur("hR",20.0)
 ecrire_valeur("hL",8000.0)
@@ -890,14 +897,14 @@ plt.tight_layout()
 
 # Afficher toutes les figures en même temps
 plt.show()
-
 """
+
 ######################################################## Question 5.4 (e) ####################################################
 """
 # Exemple pour la solution numérique et anlytique
 g  = 9.81
 
-
+ecrire_valeur("fac","false")
 ecrire_valeur("L",1000000)
 ecrire_valeur("hR",20.0)
 ecrire_valeur("hL",8000.0)
@@ -1015,20 +1022,20 @@ ani_left = animation.FuncAnimation(fig_tsu_C, update_tsu_C, frames=nt, init_func
                                    blit=True, interval=30)
 plt.tight_layout()
 plt.show()
-
+"""
 ##############################################################################################################################
 ##############################################   Facultatif  #################################################################
-
 """
+
 ecrire_valeur("fac","true")
 ecrire_valeur("equation_type","B") #Attention la C ne marche pas : problème dans l'éq.
 ecrire_valeur("L",25.0)
 ecrire_valeur("h00",1.0)
 ecrire_valeur("cb_gauche","fixe")
-ecrire_valeur("cb_droite","fixe")
-ecrire_valeur("cb_bas","fixe")
+ecrire_valeur("cb_droite","excitation")
+ecrire_valeur("cb_bas","excitation")
 ecrire_valeur("cb_haut","fixe")
-ecrire_valeur("f_hat",10.0)
+ecrire_valeur("f_hat",0.0)
 ecrire_valeur("x1",10.0)
 ecrire_valeur("x2",15.0)
 ecrire_valeur("v_uniform","true")
@@ -1106,3 +1113,4 @@ ani = animation.FuncAnimation(fig, update, frames=nsteps, init_func=init,
 
 plt.tight_layout()
 plt.show()
+"""
